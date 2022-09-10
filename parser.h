@@ -9,14 +9,14 @@
 typedef struct {
     bool help;
     bool verbose;
-    unsigned char infile[128];
-    unsigned char outfile[128];
+    char infile[MAX_FILENAME_SIZE];
+    char outfile[MAX_FILENAME_SIZE];
     int value;
 } settings;
 
 typedef void (*flag_handler_t)(settings *stt);
 
-typedef void (*arg_handler_t)(settings *stt, unsigned char *arg);
+typedef void (*arg_handler_t)(settings *stt, char *arg);
 
 typedef struct {
     char name[MAX_NAME_SIZE];
@@ -28,15 +28,9 @@ typedef struct {
     arg_handler_t handler;
 } arg_umap_entry;
 
-typedef struct {
-    unsigned char *name;
-} parser;
-
-void init_parser(parser *psr, unsigned char *name);
-
 void init_settings(settings *stt);
 
-void parse_settings(parser *psr, settings *stt, int argc, char *argv[]);
+void parse_settings(settings *stt, int argc, char *argv[]);
 
 void print_settings(settings *my_settings);
 

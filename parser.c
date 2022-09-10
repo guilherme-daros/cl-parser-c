@@ -10,9 +10,9 @@
 void f_help(settings *stt) { stt->help = true; }
 void f_verbose(settings *stt) { stt->verbose = true; }
 
-void a_infile(settings *stt, unsigned char *arg) { strcpy(stt->infile, arg); }
-void a_outfile(settings *stt, unsigned char *arg) { strcpy(stt->outfile, arg); }
-void a_value(settings *stt, unsigned char *arg) { stt->value = atoi(arg); }
+void a_infile(settings *stt, char *arg) { strcpy(stt->infile, arg); }
+void a_outfile(settings *stt, char *arg) { strcpy(stt->outfile, arg); }
+void a_value(settings *stt, char *arg) { stt->value = atoi(arg); }
 
 flag_umap_entry flags[flag_umap_size] = {
     {"--help", f_help},
@@ -28,8 +28,6 @@ arg_umap_entry args[arg_umap_size] = {
 
     {"--value", a_value},
 };
-
-void init_parser(parser *psr, unsigned char *name) { strcpy(psr->name, name); }
 
 void init_settings(settings *stt) {
     stt->help = false;
@@ -50,7 +48,7 @@ void print_settings(settings *my_settings) {
     printf("value: %i\n\r", my_settings->value);
 }
 
-void parse_settings(parser *psr, settings *stt, int argc, char *argv[]) {
+void parse_settings(settings *stt, int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         char opt[MAX_NAME_SIZE];
         strcpy(opt, argv[i]);
@@ -65,7 +63,7 @@ void parse_settings(parser *psr, settings *stt, int argc, char *argv[]) {
                             args[i].handler(stt, argv[i]);
                         } else {
                             char tmp[1024];
-                            sprintf(tmp, "[%s] missing param after %s", psr->name, argv[i]);
+                            sprintf(tmp, "[cl-parser] missing param after %s", argv[i]);
                             fputs(tmp, stderr);
                             exit(0);
                         }
@@ -74,7 +72,7 @@ void parse_settings(parser *psr, settings *stt, int argc, char *argv[]) {
                             strcpy(stt->infile, argv[i]);
                         } else {
                             char tmp[1024];
-                            sprintf(tmp, "[%s] unrecognized command line option: %s", psr->name,
+                            sprintf(tmp, "[cl-parser] unrecognized command line option: %s",
                                     argv[i]);
                             fputs(tmp, stderr);
                             exit(0);
