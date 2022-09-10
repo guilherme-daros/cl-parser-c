@@ -10,21 +10,21 @@
 void f_help(settings *stt) { stt->help = true; }
 void f_verbose(settings *stt) { stt->verbose = true; }
 
-void a_infile(settings *stt, char *arg) { strcpy(stt->infile, arg); }
-void a_outfile(settings *stt, char *arg) { strcpy(stt->outfile, arg); }
+void a_infile(settings *stt, char *arg) { strncpy(stt->infile, arg, sizeof(stt->infile)); }
+void a_outfile(settings *stt, char *arg) { strncpy(stt->outfile, arg, sizeof(stt->outfile)); }
 void a_value(settings *stt, char *arg) { stt->value = atoi(arg); }
 
 flag_umap_entry flags[flag_umap_size] = {
     {"--help", f_help},
-    {"-h", f_help},
+    {"-H", f_help},
 
     {"--verbose", f_verbose},
-    {"-v", f_verbose},
+    {"-V", f_verbose},
 };
 
 arg_umap_entry args[arg_umap_size] = {
     {"--output", a_outfile},
-    {"-o", a_outfile},
+    {"-O", a_outfile},
 
     {"--value", a_value},
 };
@@ -32,8 +32,8 @@ arg_umap_entry args[arg_umap_size] = {
 void init_settings(settings *stt) {
     stt->help = false;
     stt->verbose = false;
-    strcpy(stt->infile, " ");
-    strcpy(stt->outfile, " ");
+    strcpy(stt->infile, "");
+    strcpy(stt->outfile, "");
     stt->value = 0;
 }
 
@@ -50,36 +50,44 @@ void print_settings(settings *my_settings) {
 
 void parse_settings(settings *stt, int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
-        char opt[MAX_NAME_SIZE];
+        char opt[MAX_NAME_SIZE] = "";
         strcpy(opt, argv[i]);
+        bool found = false;
 
         for (int j = 0; j < flag_umap_size; j++) {
-            if (flags[j].name == opt) {
+            if (strstr(opt, flags[j].name) != NULL) {
+                found = true;
                 flags[j].handler(stt);
-            } else {
-                for (int j = 0; j < arg_umap_size; j++) {
-                    if (args[j].name == opt) {
-                        if (++i < argc) {
-                            args[i].handler(stt, argv[i]);
-                        } else {
-                            char tmp[1024];
-                            sprintf(tmp, "[cl-parser] missing param after %s", argv[i]);
-                            fputs(tmp, stderr);
-                            exit(0);
-                        }
-                    } else {
-                        if (!stt->infile) {
-                            strcpy(stt->infile, argv[i]);
-                        } else {
-                            char tmp[1024];
-                            sprintf(tmp, "[cl-parser] unrecognized command line option: %s",
-                                    argv[i]);
-                            fputs(tmp, stderr);
-                            exit(0);
-                        }
-                    }
+            }
+        }
+        for (int j = 0; j < arg_umap_size; j++) {
+            if (strstr(opt, args[j].name) != NULL) {
+                found = true;
+                if (++i < argc) {
+                    args[j].handler(stt, argv[i]);
+                } else {
+                    char tmp[1024];
+                    sprintf(tmp, "[cl-parser] missing param after %s", argv[i]);
+                    fputs(tmp, stderr);
+                    exit(0);
                 }
             }
+        }
+        if (!stt->infile[0] && !found) {
+            found = true;
+            if (argv[i][0] != '-') {
+                strcpy(stt->infile, argv[i]);
+            } else {
+                char tmp[1024];
+                sprintf(tmp, "[cl-parser] unrecognized command line option: %s", argv[i]);
+                fputs(tmp, stderr);
+                exit(0);
+            }
+        } else if (!found) {
+            char tmp[1024];
+            sprintf(tmp, "[cl-parser] unrecognized command line option: %s", argv[i]);
+            fputs(tmp, stderr);
+            exit(0);
         }
     }
 };
