@@ -32,20 +32,20 @@ arg_umap_entry args[arg_umap_size] = {
 void init_settings(settings *stt) {
     stt->help = false;
     stt->verbose = false;
-    strcpy(stt->infile, "");
-    strcpy(stt->outfile, "");
+    memset(stt->infile, 0, sizeof(stt->infile));
+    memset(stt->outfile, 0, sizeof(stt->outfile));
     stt->value = 0;
 }
 
 void print_settings(settings *my_settings) {
-    printf("[Flags]\n\r");
-    printf("help: %s\n\r", (my_settings->help ? "true" : "false"));
-    printf("verbose: %s\n\r", (my_settings->verbose ? "true" : "false"));
+    printf("(cl-parser) [Flags]\n\r");
+    printf("(cl-parser)  help: %s\n\r", (my_settings->help ? "true" : "false"));
+    printf("(cl-parser)  verbose: %s\n\r\n\r", (my_settings->verbose ? "true" : "false"));
 
-    printf("[Arguments]\n\r");
-    printf("infile: %s\n\r", my_settings->infile);
-    printf("outfile: %s\n\r", my_settings->outfile);
-    printf("value: %i\n\r", my_settings->value);
+    printf("(cl-parser) [Arguments]\n\r");
+    printf("(cl-parser)  infile: %s\n\r", my_settings->infile);
+    printf("(cl-parser)  outfile: %s\n\r", my_settings->outfile);
+    printf("(cl-parser)  value: %i\n\r", my_settings->value);
 }
 
 void parse_settings(settings *stt, int argc, char *argv[]) {
@@ -67,7 +67,7 @@ void parse_settings(settings *stt, int argc, char *argv[]) {
                     args[j].handler(stt, argv[i]);
                 } else {
                     char tmp[1024];
-                    sprintf(tmp, "[cl-parser] missing param after %s", argv[i]);
+                    sprintf(tmp, "(cl-parser) missing param after %s", argv[i]);
                     fputs(tmp, stderr);
                     exit(0);
                 }
@@ -79,7 +79,7 @@ void parse_settings(settings *stt, int argc, char *argv[]) {
                 strcpy(stt->infile, argv[i]);
             } else {
                 char tmp[1024];
-                sprintf(tmp, "[cl-parser] unrecognized command line option: %s", argv[i]);
+                sprintf(tmp, "(cl-parser) unrecognized command line option: %s", argv[i]);
                 fputs(tmp, stderr);
                 exit(0);
             }
